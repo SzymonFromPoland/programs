@@ -3,7 +3,12 @@
 from ev3dev2.motor import OUTPUT_A, OUTPUT_B, OUTPUT_C,  LargeMotor, MediumMotor
 from ev3dev2.sensor import INPUT_2, INPUT_4
 from ev3dev2.sensor.lego import UltrasonicSensor
+from ev3dev2.led import Leds
+from ev3dev2.button import Button
 from time import sleep
+
+leds = Leds()
+btn = Button()
 
 usRight = UltrasonicSensor(INPUT_2)
 usLeft = UltrasonicSensor(INPUT_4)
@@ -21,6 +26,7 @@ enemyAngle = 30
 lastEnemyAngle = 0
 x = 0
 atack = False
+start = False
 
 KP = 120
 KI = 10
@@ -90,12 +96,55 @@ def tracking():
 
 
 ### MAIN ###
+    
+leds.set_color('LEFT', (1, 0))
+leds.set_color('RIGHT', (1, 0))
 
 while True:
-    # print(str(round(enemyAngle)), str(round(distLeft)), str(round(distRight)), str(round(x)))
-    tracking()
-    
+    btn.process()
+    print(lastEnemyAngle)
 
+    if start == True:
+        
+        tracking()
+
+        if btn.enter:
+        
+            btn.wait_for_released('enter', 10000)
+
+            start = False
+
+            leds.set_color('LEFT', (1, 0))
+            leds.set_color('RIGHT', (1, 0))
+
+            mRight.off(brake = False)
+            mLeft.off(brake = False)
+            mMid.off(brake = False)
+
+    else:
+
+        if btn.down:
+
+            btn.wait_for_released('down', 10000)
+            enemyAngle = -30
+
+
+        if btn.up:
+
+            btn.wait_for_released('up', 10000)
+            enemyAngle = 30
+
+
+        if btn.enter:
+
+            btn.wait_for_released('enter', 10000)
+
+            leds.set_color('LEFT', (0, 1))
+            leds.set_color('RIGHT', (0, 1))
+
+            sleep(4.9)
+            start = True
 
     # sleep(0.001)
+    # print(str(round(enemyAngle)), str(round(distLeft)), str(round(distRight)), str(round(x)))
 
